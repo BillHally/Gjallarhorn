@@ -46,14 +46,17 @@ and internal BindingSourceTypeDescriptorProvider(parent) =
     new() = BindingSourceTypeDescriptorProvider(TypeDescriptor.GetProvider(typedefof<DesktopBindingSource<_>>))
 
     override __.GetTypeDescriptor(objType, inst) =
-        match td with
-        | desc, i when desc <> null && obj.ReferenceEquals(i, inst) ->
-            desc
-        | _ ->
-            let parent = base.GetTypeDescriptor(objType, inst)
-            let desc = BindingSourceTypeDescriptor(parent, inst :?> IPropertyBag) :> ICustomTypeDescriptor
-            td <- desc, inst
-            desc
+        if inst = null then
+            base.GetTypeDescriptor(objType, inst)
+        else
+            match td with
+            | desc, i when desc <> null && obj.ReferenceEquals(i, inst) ->
+                desc
+            | _ ->
+                let parent = base.GetTypeDescriptor(objType, inst)
+                let desc = BindingSourceTypeDescriptor(parent, inst :?> IPropertyBag) :> ICustomTypeDescriptor
+                td <- desc, inst
+                desc
 
 and [<AllowNullLiteral>] internal BindingSourceTypeDescriptor(parent, inst : IPropertyBag) =
     inherit CustomTypeDescriptor(parent)
